@@ -1,10 +1,10 @@
-
+import functools
 
 class Employee:
     def __init__(self, lis: list):
         self.name, self.status, self.salary, self.pay_basis, self.position_title = lis
         self.salary = float(self.salary.replace(',', '').replace('$',''))
-    
+        
     def __repr__(self):
         return f'{self.name}'
     
@@ -28,7 +28,7 @@ class WH:
         self.__open_fil()
         self.all_type_pos = set(obj.position_title for obj in self.sort_list)
         self.all_type_status = set(obj.status for obj in self.sort_list)
-        
+    
     def __open_fil(self):
         with open(self.fil) as f:
             read = f.readlines()
@@ -38,7 +38,7 @@ class WH:
             l.append(Employee(line))
         self.sort_list = l
         self.amount_sotr = len(self.sort_list)
-        
+    
     def middle_salary(self):
         all_salary = 0
         for per in self.sort_list:
@@ -64,7 +64,7 @@ class WH:
         for line in list_title:
             text += f'{line}\n'
         return text
-    
+        
     def position_st(self):
         s, text = {}, ''
         new_list = sorted(self.sort_list, key=Employee.get_position_title)
@@ -76,26 +76,41 @@ class WH:
         for k, v in s.items():
             text += f'Amount: {v}, title: {k}\n'
         return text
-     
+        
+    def Person_amount(func):
+        @functools.wraps(func)
+        def wrapper(self):
+            st = func(self)
+            if st in self.all_type_pos:
+                return len([per.name for per in self.sort_list \
+                            if st == per.position_title])
+            elif st in self.all_type_status:
+                return len([per.name for per in self.sort_list \
+                            if st == per.status])
+        return wrapper
+
+    @Person_amount
     def detailee_amount(self):
-        amount = 0
-        for per in self.sort_list:
-            if per.status == 'Detailee':
-                amount += 1
-        else:
-            return amount
-    
+        return 'Detailee'
+
+    @Person_amount
+    def employee_amount(self):
+        return 'Employee'
+
+    @Person_amount
     def staffass_amount(self):
-        amount = 0
-        for per in self.sort_list:
-            if per.position_title == "STAFF ASSISTANT":
-                amount += 1
-        else:
-            return amount
+        return "STAFF ASSISTANT"
+    
+    @Person_amount
+    def executive_amount(self):
+        return "EXECUTIVE ASSISTANT"
 
 
 wh = WH('wh.csv')
 
+print(wh.executive_amount())
+print(wh.employee_amount())
+print(wh.detailee_amount())
 print(wh.middle_salary())
 print(wh.top10_most_reach())
 print(wh.detailee_amount())
@@ -104,3 +119,18 @@ print(wh.middle_sal_stass())
 print(wh.amount_per_on_work_title())
 print(wh.position_st())
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
